@@ -16,3 +16,4 @@ I am currently working on a project that contains multiple inter-dependent REST 
 # Steps
 
 - [Designing the library API](1-designing-the-api.md)
+- [Updating the library API for better DX](2-updating-the-library-api-for-better-dx.md)
