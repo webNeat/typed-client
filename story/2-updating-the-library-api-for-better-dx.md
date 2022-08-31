@@ -157,17 +157,19 @@ const UnknownError = z.object({
   details: z.string(),
 })
 
-// Create the API
-const api = tc.create({
-  url: 'https://example.test',
-  responses: {
-    401: {body: AccessDeniedError},
-    500: {body: UnknownError},
-  },
+// Create the client API
+const api = tc.client('https://example.test')
+
+// Create a group with shared responses
+const group = api.group({
+  responses: [
+    {status: 401, body: AccessDeniedError},
+    {status: 500, body: UnknownError},
+  ]
 })
 
-// Create endpoints
-export const login = api.post('/login', {
+// Create endpoints using the group
+export const login = group.post('/login', {
   body: z.object({
     email: z.string(),
     password: z.string(),
@@ -178,7 +180,7 @@ export const login = api.post('/login', {
   },
 })
 
-export const getTasks = api.get('/tasks', {
+export const getTasks = group.get('/tasks', {
   query: {
     search: z.string().optional(),
     status: TaskStatus.optional(),
@@ -192,7 +194,7 @@ export const getTasks = api.get('/tasks', {
   },
 })
 
-export const addTask = api.post('/tasks', {
+export const addTask = group.post('/tasks', {
   headers: {
     Authorization: z.string(),
   },
