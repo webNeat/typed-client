@@ -1,7 +1,7 @@
 # Updating the library API for better DX
 
 Last time, I defined an example API with the base URL `https://example.test`, and the following endpoints:
-- `POST /login`
+- `POST /login`:
   - body `{email: string, password: string}`. 
   - returns `200` response with body `{token: string}`.
   - or `401` response with body `{error: 'WrongCredentials', details: string}`.
@@ -10,7 +10,7 @@ Last time, I defined an example API with the base URL `https://example.test`, an
   - header `{Authorization: '{token}'}`.
   - returns `200` response with body `Array<{id: number, content: string, status: 'waiting' | 'in-progress' | 'done'}>`.
   - or `401` response with body `{error: 'AccessDenied', details: string}`.
-- `POST /tasks`
+- `POST /tasks`:
   - header `{Authorization: '{token}'}`.
   - body `{content: string}`.
   - returns `201` response with body `{id: number, content: string, status: 'waiting' | 'in-progress' | 'done'}`.
@@ -247,22 +247,24 @@ if (res.status === 200) {
 import * as client from './client'
 
 test('some feature', async () => {
-  client.login.mock({
-    body: {email: 'foo@bar.baz', password: 'secret'},
-    response: {
-      status: 200,
-      body: {token: 'fake-token'}
-    }
+  client.login.mock(() => ({
+    status: 200,
+    body: {token: 'fake-token'}
   })
-  client.addTask.mock({
-    headers: {Authorization: 'fake-token'},
-    body: value => {
-      expect(value.content).toBeTruthy()
-    },
-    response: {
-      status: 201,
-      headers: {...},
-      body: {id: 1, content: 'something to do', status: 'in-progress'}
+  client.addTask.mock(async ({headers, body}) => {
+    if (headers.Authorization === 'fake-token') {
+      return {
+        status: 201,
+        headers: {...},
+        body: {id: 1, content: body.content, status: 'in-progress'}
+      }
+    }
+    return {
+      status: 401,
+      body: {
+        error: 'AccessDenied',
+        details: `Invalid access token`
+      }
     }
   })
 
@@ -276,7 +278,7 @@ test('some feature', async () => {
 Here are some reasons why I prefer this approach over the previous one:
 - **Better auto-complete & documentation:** With the previous approach, if I want to call the `/login` endpoint, I would type `client.post('/login', {...})`. It requires me to know the HTTP method and the URL of the endpoint in order to use it. The new approach allows me to just type `client.` and hit `ctrl+space` on VSCode to have the list of all endpoints. Additional documentation of each endpoint can be added as a DocBlock when creating it and will show in the editor autocomplete making the client easier to use.
 
-- **Flexibility:** Defining each endpoint as a separate function makes allows us to do things like:
+- **Flexibility:** Defining each endpoint as a separate function allows us to do things like:
 ```ts
 export const login = api.post('/login', ...)
 export const tasks = {
@@ -293,3 +295,4 @@ await client.tasks.get({...})
 If the API has a lot of endpoints, it makes sense to use this sort of design to organize them under namespaces.
 
 - **Makes the client tree-shakable:** If I only need to use the `getTasks` endpoint on my code, I can `import {getTasks} from 'my-client'` and have only the code of this endpoint added to my bundle.
+- **Dynamic mocks:** When mock an endpoint, I provide a function that takes the request (route params, query params, headers and body) and returns the response status, headers and body. I can also run `expect`s against the request inside that function. 

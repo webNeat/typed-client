@@ -62,12 +62,16 @@ describe('Type inference', () => {
     type Req = {
       body: z.infer<typeof LoginCredentials>
     }
-    type Res = {
-      status: 200
-      headers: Record<string, string>
-      body: {token: string}
-    }
-    expectTypeOf(login).toEqualTypeOf(async (_: Req): Promise<Res | AccessDeniedRes> => null as any)
+    type Res =
+      | AccessDeniedRes
+      | {
+          status: 200
+          headers: Record<string, string>
+          body: {token: string}
+        }
+    type Handler = (req: Req) => Res | Promise<Res>
+    expectTypeOf(login).toEqualTypeOf(async (_: Req): Promise<Res> => null as any)
+    expectTypeOf(login.mock).toEqualTypeOf((_: Handler) => {})
   })
 
   it('infers request and response types of a composed endpoint', async () => {
@@ -75,12 +79,17 @@ describe('Type inference', () => {
       params: {userId: number}
       headers: {token: string}
     }
-    type Res = {
-      status: 200
-      headers: Record<string, string>
-      body: z.infer<typeof User>
-    }
-    expectTypeOf(getUser).toEqualTypeOf(async (_: Req): Promise<Res | NotFoundRes | ServerErrRes> => null as any)
+    type Res =
+      | NotFoundRes
+      | ServerErrRes
+      | {
+          status: 200
+          headers: Record<string, string>
+          body: z.infer<typeof User>
+        }
+    type Handler = (req: Req) => Res | Promise<Res>
+    expectTypeOf(getUser).toEqualTypeOf(async (_: Req): Promise<Res> => null as any)
+    expectTypeOf(getUser.mock).toEqualTypeOf((_: Handler) => {})
   })
 
   it('infers merged params for composed endpoint', async () => {
@@ -88,12 +97,17 @@ describe('Type inference', () => {
       params: {userId: number; postId: number}
       headers: {token: string}
     }
-    type Res = {
-      status: 200
-      headers: Record<string, string>
-      body: z.infer<typeof Post>
-    }
-    expectTypeOf(getUserPost).toEqualTypeOf(async (_: Req): Promise<Res | NotFoundRes | ServerErrRes> => null as any)
+    type Res =
+      | NotFoundRes
+      | ServerErrRes
+      | {
+          status: 200
+          headers: Record<string, string>
+          body: z.infer<typeof Post>
+        }
+    type Handler = (req: Req) => Res | Promise<Res>
+    expectTypeOf(getUserPost).toEqualTypeOf(async (_: Req): Promise<Res> => null as any)
+    expectTypeOf(getUserPost.mock).toEqualTypeOf((_: Handler) => {})
   })
 
   it('uses default type for params if not provided', async () => {

@@ -6,6 +6,7 @@ export interface Client {
   post: EndpointMethod
   put: EndpointMethod
   delete: EndpointMethod
+  unmock(): void
 }
 
 export interface Group<Config extends BaseEndpointConfig> {
@@ -14,12 +15,17 @@ export interface Group<Config extends BaseEndpointConfig> {
   post: EndpointMethod<Config>
   put: EndpointMethod<Config>
   delete: EndpointMethod<Config>
+  unmock(): void
 }
 
-export interface Endpoint<Config extends BaseEndpointConfig> {
-  (req: ExtractRequest<Config>): Promise<ExtractResponse<Config>>
-  // mock(...)
-  // unmock()
+export interface Endpoint<
+  Config extends BaseEndpointConfig,
+  Req = ExtractRequest<Config>,
+  Res = ExtractResponse<Config>,
+> {
+  (req: Req): Promise<Res>
+  mock(handler: (req: Req) => Res | Promise<Res>): void
+  unmock(): void
 }
 
 export type GroupMethod<BaseConfig extends BaseEndpointConfig = {}> = <

@@ -1,5 +1,5 @@
 import {Client} from './types'
 
-export function client(url: string): Client {
+export function client(_: string): Client {
   return null as any
 }
