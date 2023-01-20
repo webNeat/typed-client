@@ -1,6 +1,6 @@
 {
   "name": "typed-client",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "A library to write typed API clients using Typescript",
   "author": "Amine Ben hammou (@webNeat)",
   "license": "MIT",
