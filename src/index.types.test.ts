@@ -1,4 +1,4 @@
-import {z} from 'zod'
+import z from 'zod'
 import {expectTypeOf} from 'expect-type'
 import {client} from '.'
 

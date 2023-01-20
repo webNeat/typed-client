@@ -1,7 +1,7 @@
 import z from 'zod'
 import {Is} from 'just-types'
 import {Equal, Extends} from 'expect-type'
-import {Normalize} from './Utils'
+import {Normalize} from './Objects'
 
 export type Validator<T = any> = T extends never ? never : z.ZodType<T>
 export type Validators<T> = {
@@ -36,5 +36,3 @@ type Tests = [
     >
   >,
 ]
-
-type Foo = ValidatorTypes<Data>

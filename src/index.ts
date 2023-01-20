@@ -1,5 +1,2 @@
-import {Client} from './types'
-
-export function client(_: string): Client {
-  return null as any
-}
+export * from './types/public'
+export {createClient as client} from './client'
